@@ -12,6 +12,10 @@ The steps in this stage will not involve the Raspberry Pi at all. In fact, they 
 
 The main goal here is to streamline the network itself.
 
+### Disable AT&T Wi-Fi
+
+We don't need the AT&T device to also output a Wi-Fi signal, since we have the Deco for that.
+
 1. Make it so the AT&T device only has two things plugged into it (not counting a power cable):
    - The coax cable / whatever cable carries the signal from the wall
    - An ethernet cable connecting to the main Deco router. This cable should be plugged into "Port 1" (5Gbps, may be indicated by a blue line?) on the AT&T side, and "WAN" on the Deco side.
@@ -30,26 +34,36 @@ The main goal here is to streamline the network itself.
 
 8. Note that any devices which were using the direct AT&T Wi-Fi, will now need to be pointed at the Deco instead. This is another spot that we stop and be sure everything is working again.
 
-9. Back in AT&T settings, navigate to Firewall -> IP Passthrough.
+### IP Passthrough
 
-10. Set "Allocation Mode" to Passthrough, and set "Passthrough Mode" to DHCPS-fixed.
+Bridge the connection from the wall / AT&T, to the Deco. After this is complete, the AT&T device will only have one job that it does really well: make the internet connection from your ISP available to your home network.
 
-11. Under "Passthrough Fixed MAC Address" there should be a drop-down list where we can look for the Deco router. If it doesn't show up, we can select "Manual" and type in the WAN MAC address of the Deco router, which we should be able to find somewhere in those settings.
+1. Back in AT&T settings, navigate to Firewall -> IP Passthrough.
 
-12. "Passthrough DHCP Lease" is probably fine to leave alone / whatever the default is.
+2. Set "Allocation Mode" to Passthrough, and set "Passthrough Mode" to DHCPS-fixed.
 
-13. Save these updates too.
+3. Under "Passthrough Fixed MAC Address" there should be a drop-down list where we can look for the Deco router. If it doesn't show up, we can select "Manual" and type in the WAN MAC address of the Deco router, which we should be able to find somewhere in those settings.
 
-14. Navigate to Firewall -> Packet Filter.
+4. "Passthrough DHCP Lease" is probably fine to leave alone / whatever the default is.
 
-15. Click "Disable Packet Filters".
+5. Save these updates too.
 
-16. Navigate to Firewall -> Firewall Advanced and turn off all the toggles on this page.
+### Disable AT&T Firewall
 
-17. Click "Save".
+We don't need the AT&T device to do anything except give internet to the Deco, and "anything" also includes firewall stuff.
 
-18. Turn off both the Deco and the AT&T device. Make sure that the ethernet from the AT&T's "Port 1" is plugged into the WAN port of the Deco. Unplug the extra ethernet we used to change these settings.
+1. Navigate to Firewall -> Packet Filter.
 
-19. Turn on the AT&T device again (needs to have been off for at least 30 seconds) and wait until the front light turns solid white.
+2. Click "Disable Packet Filters".
 
-20. Turn the Deco back on, wait for it to boot up completely / for the lights to stop changing, then make sure everything still works.
+3. Navigate to Firewall -> Firewall Advanced and turn off all the toggles on this page.
+
+4. Click "Save".
+
+### Wrapping Up Stage 1
+
+1. Turn off both the Deco and the AT&T device. Make sure that the ethernet from the AT&T's "Port 1" is plugged into the WAN port of the Deco. Unplug the extra ethernet we used to change these settings.
+
+2. Turn on the AT&T device again (needs to have been off for at least 30 seconds) and wait until the front light turns solid white.
+
+3. Turn the Deco back on, wait for it to boot up completely / for the lights to stop changing, then make sure everything still works.
