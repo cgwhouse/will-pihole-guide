@@ -67,3 +67,42 @@ We don't need the AT&T device to do anything except give internet to the Deco, a
 2. Turn on the AT&T device again (needs to have been off for at least 30 seconds) and wait until the front light turns solid white.
 
 3. Turn the Deco back on, wait for it to boot up completely / for the lights to stop changing, then make sure everything still works.
+
+## Stage 2 - Core Pi-hole Setup
+
+1. Image the SD card using `rpi-imager`. When selecting the OS, choose Alpine Linux.
+
+2. After the imager does its thing, put the "headless" archive thing at the root of the SD card.
+
+3. Put SD card into the Pi, and connect it to the router via Ethernet cable. Reminder: the Ethernet connecting the modem to the router should be plugged into the WAN port, but the router should have multiple LAN ports available as well (they are all Ethernet ports, but they serve different purposes). You want the Pi connected to a LAN port.
+
+4. The Pi should boot up, it may take a couple minutes. Wait until you can see it as a device on the network in your router settings. Note the IP address your router gave it.
+
+5. Using a terminal on your computer (or some other dedicated program, e.g. PuTTY), ssh into the Pi using the IP address you found in router settings. The username will be "root" and there should be no password required.
+
+6. Run the `setup-alpine` script to install the base system. To keep things simple, we will be doing a traditional "sys" install.
+
+7. Once the script completes, reboot the Pi which should kick you out of your ssh session. Once it comes back up, ssh in again (will need to provide a password this time).
+
+8. Figure out whether your home network uses IPv6. No big deal either way, but it will affect some of the steps we perform later on.
+
+9. Establish the following baseline:
+   - Text editor
+   - Enable community repo + use https
+   - Shell (I prefer zsh)
+   - NTP / chrony (config edit from Alpine Wiki for good measure)
+   - `raspberrypi-bootloader-cutdown` thing from Alpine Wiki
+   - Firewall (I prefer ufw), can go ahead and do the prerequisite commands from Cristian's edc repo + the Pi-hole docs
+   - Replace busybox cron with cronie
+
+10. You probably want to throw one more reboot in after all that configuring is done. Also, go ahead and give the Pi a static IP address via router settings.
+
+11. After the dust settles from all of the above, ensure bash is installed and then run the Pi-hole setup script.
+
+12. Access the dashboard via web browser, remembering to change the auto-generated password to something more reasonable.
+
+13. If everything looks reasonable, edit the router settings so that the Pi is now the DNS provider for your home network. On my router, this causes everything to get booted off and reconnect.
+
+14. Test internet access on some other device(s), everything should be working as normal and we should see requests coming through on the Pi-hole dashboard.
+
+15. Setup unbound, using Cloudflare as the upstream, take config snippets from edc repo.
