@@ -67,3 +67,57 @@ We don't need the AT&T device to do anything except give internet to the Deco, a
 2. Turn on the AT&T device again (needs to have been off for at least 30 seconds) and wait until the front light turns solid white.
 
 3. Turn the Deco back on, wait for it to boot up completely / for the lights to stop changing, then make sure everything still works.
+
+## Stage 2 - Core Pi-hole Setup
+
+This is where the Raspberry Pi enters the picture. By the end of this stage, the Pi will be running Pi-hole as the DNS provider for the whole network, with unbound handling recursive lookups behind it.
+
+### Image the SD Card
+
+1. Use `rpi-imager` to flash the SD card. For the OS, choose Alpine Linux (the Raspberry Pi build).
+
+2. Once imaging finishes, copy the "headless" overlay archive (the `.apkovl.tar.gz` file we prepared ahead of time) to the root of the SD card's boot partition. That archive is what tells Alpine to bring up networking and SSH on first boot, so we don't need a keyboard or monitor attached to the Pi.
+
+### First Boot and SSH
+
+1. Insert the SD card into the Pi and connect the Pi to the Deco with an Ethernet cable. Reminder: the cable from the AT&T device goes into the Deco's WAN port; the Pi goes into one of the Deco's LAN ports.
+
+2. Power the Pi on. It may take a couple of minutes to come up. Watch the device list in the Deco settings, and note the IP address it assigns to the Pi.
+
+3. From your computer, SSH into that IP (using a terminal, or PuTTY, or similar). The username is `root`, and no password is required on this first connection.
+
+### Install the Base System
+
+1. Run `setup-alpine`. We'll do a traditional "sys" install to keep things simple.
+
+2. When the script finishes, reboot the Pi. That will drop your SSH session. Once the Pi comes back up, SSH in again — this time using the password you set during `setup-alpine`.
+
+3. Check whether your home network uses IPv6. Not a blocker either way, but a few later steps will depend on the answer.
+
+### Baseline Configuration
+
+Before installing Pi-hole, get the following squared away. Most of these have brief instructions in the Alpine Wiki and/or my edc repo:
+
+- A text editor of your choice
+- Enable the community repo, and switch repo URLs to HTTPS
+- A shell (I prefer zsh)
+- NTP via chrony — apply the small config edit from the Alpine Wiki for good measure
+- The `raspberrypi-bootloader-cutdown` package, per the Alpine Wiki
+- A firewall (I prefer ufw). Run the prerequisite commands from my edc repo and the Pi-hole docs first, so we don't lock ourselves out
+- Replace busybox cron with cronie
+
+Once all of that is in place, reboot the Pi one more time. While you're at it, assign the Pi a static IP via the Deco's settings — Pi-hole needs a stable address.
+
+### Install Pi-hole
+
+1. Make sure bash is installed (the Pi-hole installer needs it), then run the Pi-hole installer script.
+
+2. Open the Pi-hole dashboard in a web browser. Change the auto-generated admin password to something more reasonable.
+
+3. If the dashboard looks healthy, update the Deco's DNS settings to point to the Pi's static IP. On my router this kicks every device off and forces them to reconnect, so expect a brief disruption.
+
+4. Test internet access from a couple of other devices. Everything should work normally, and you should start seeing queries show up on the Pi-hole dashboard.
+
+### Add Unbound
+
+Set up unbound as a recursive resolver in front of Pi-hole, with Cloudflare as the upstream. Use the config snippets from my edc repo as a starting point.
